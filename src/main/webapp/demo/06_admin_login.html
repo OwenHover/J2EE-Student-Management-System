@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Login - Course Management System</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: "Segoe UI", Arial, sans-serif; background: #f0f2f5; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+  .login-wrap { width: 400px; }
+  .login-header { text-align: center; margin-bottom: 30px; }
+  .login-header h1 { font-size: 24px; color: #1a73e8; font-weight: 700; }
+  .login-header p { color: #666; font-size: 14px; margin-top: 6px; }
+  .login-card { background: #fff; border-radius: 8px; padding: 36px 40px; box-shadow: 0 2px 12px rgba(0,0,0,0.1); }
+  .form-title { font-size: 18px; color: #333; font-weight: 600; margin-bottom: 24px; padding-bottom: 14px; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 8px; }
+  .admin-badge { background: #e8f0fe; color: #1a73e8; font-size: 12px; padding: 2px 10px; border-radius: 10px; font-weight: 500; }
+  .form-group { margin-bottom: 18px; }
+  .form-group label { display: block; font-size: 14px; color: #555; margin-bottom: 6px; font-weight: 500; }
+  .required { color: #e53935; margin-left: 2px; }
+  .form-group input { width: 100%; height: 40px; border: 1px solid #ddd; border-radius: 4px; padding: 0 12px; font-size: 14px; color: #333; outline: none; font-family: inherit; }
+  .form-group input:focus { border-color: #1a73e8; box-shadow: 0 0 0 2px rgba(26,115,232,0.1); }
+  .btn-group { display: flex; gap: 12px; margin-top: 24px; }
+  .btn { flex: 1; height: 40px; border: none; border-radius: 4px; font-size: 15px; cursor: pointer; font-family: inherit; font-weight: 500; }
+  .btn:hover { opacity: 0.85; }
+  .btn-primary { background: #1a73e8; color: #fff; }
+  .btn-default { background: #f5f5f5; color: #555; border: 1px solid #ddd; }
+  .msg { margin-top: 14px; padding: 10px 14px; border-radius: 4px; font-size: 13px; }
+  .msg.error { background: #fff0f0; color: #d32f2f; border: 1px solid #ffcdd2; }
+  .footer-link { text-align: center; margin-top: 16px; font-size: 13px; color: #999; }
+  .footer-link a { color: #1a73e8; text-decoration: none; }
+</style>
+</head>
+<body>
+<div class="login-wrap">
+  <div class="login-header">
+    <h1>Course Management System</h1>
+    <p>Student Course Selection &amp; Management</p>
+  </div>
+  <div class="login-card">
+    <div class="form-title">Administrator Login <span class="admin-badge">Admin</span></div>
+    <div class="form-group">
+      <label>Account <span class="required">*</span></label>
+      <input type="text" id="username" placeholder="Enter admin account">
+    </div>
+    <div class="form-group">
+      <label>Password <span class="required">*</span></label>
+      <input type="password" id="password" placeholder="Enter password">
+    </div>
+    <div class="msg error" id="errMsg" style="display:none">Incorrect account or password. Please try again.</div>
+    <div class="btn-group">
+      <button class="btn btn-primary" onclick="doLogin()">Login</button>
+      <button class="btn btn-default" onclick="doReset()">Reset</button>
+    </div>
+  </div>
+  <div class="footer-link">Student? <a href="01_student_login.html">Login here</a></div>
+</div>
+<script>
+  function doLogin() {
+    const u = document.getElementById('username').value.trim();
+    const p = document.getElementById('password').value;
+    if (!u || !p) { showErr('Please enter your account and password.'); return; }
+    window.location.href = '07_admin_home.html';
+  }
+  function doReset() {
+    document.getElementById('username').value = '';
+    document.getElementById('password').value = '';
+    document.getElementById('errMsg').style.display = 'none';
+  }
+  function showErr(msg) { const el = document.getElementById('errMsg'); el.textContent = msg; el.style.display = 'block'; }
+</script>
+</body>
+</html>

@@ -1,0 +1,111 @@
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Grades - Course Management System</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: "Segoe UI", Arial, sans-serif; background: #f0f2f5; min-height: 100vh; }
+  .topbar { background: #1a73e8; color: #fff; height: 50px; display: flex; align-items: center; padding: 0 24px; justify-content: space-between; }
+  .topbar .sys-name { font-size: 16px; font-weight: 600; }
+  .topbar nav { display: flex; gap: 4px; }
+  .topbar nav a { color: rgba(255,255,255,0.85); text-decoration: none; font-size: 14px; padding: 6px 14px; border-radius: 4px; }
+  .topbar nav a:hover, .topbar nav a.active { background: rgba(255,255,255,0.15); color: #fff; }
+  .topbar .logout-btn { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); color: #fff; padding: 5px 16px; border-radius: 4px; font-size: 13px; cursor: pointer; font-family: inherit; }
+  .main { max-width: 1000px; margin: 0 auto; padding: 24px 16px; }
+  .page-title { font-size: 18px; color: #333; font-weight: 600; margin-bottom: 18px; }
+  .search-bar { background: #fff; border-radius: 8px; padding: 16px 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); margin-bottom: 20px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .search-bar label { font-size: 14px; color: #555; white-space: nowrap; }
+  .search-bar input, .search-bar select { height: 36px; border: 1px solid #ddd; border-radius: 4px; padding: 0 10px; font-size: 14px; color: #333; outline: none; font-family: inherit; }
+  .search-bar input:focus, .search-bar select:focus { border-color: #1a73e8; }
+  .btn-search { height: 36px; padding: 0 20px; background: #1a73e8; color: #fff; border: none; border-radius: 4px; font-size: 14px; cursor: pointer; }
+  .btn-reset { height: 36px; padding: 0 16px; background: #f5f5f5; color: #555; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; cursor: pointer; }
+  .grade-stats { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+  .gs-item { background: #fff; border-radius: 6px; padding: 12px 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.07); font-size: 13px; color: #555; flex: 1; min-width: 100px; text-align: center; }
+  .gs-item .n { font-size: 22px; font-weight: 700; color: #1a73e8; display: block; }
+  .semester-block { margin-bottom: 24px; }
+  .semester-tag { display: inline-block; background: #e8f0fe; color: #1a73e8; font-size: 13px; font-weight: 600; padding: 4px 14px; border-radius: 12px; margin-bottom: 12px; }
+  .table-wrap { background: #fff; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); overflow: hidden; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  thead tr { background: #f8f9fa; }
+  th { padding: 11px 14px; text-align: left; color: #555; font-weight: 600; font-size: 13px; border-bottom: 1px solid #eee; }
+  td { padding: 11px 14px; color: #333; border-bottom: 1px solid #f0f0f0; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #f8fbff; }
+  .score-val { font-weight: 600; font-size: 15px; }
+  .score-high { color: #2e7d32; }
+  .score-mid { color: #f57c00; }
+  .score-low { color: #c62828; }
+  .score-pending { color: #9e9e9e; font-size: 13px; }
+  .result-tag { display: inline-block; padding: 2px 10px; border-radius: 10px; font-size: 12px; font-weight: 500; }
+  .r-excellent { background: #e8f5e9; color: #1b5e20; }
+  .r-good { background: #e3f2fd; color: #0d47a1; }
+  .r-medium { background: #fff8e1; color: #e65100; }
+  .r-pass { background: #f3e5f5; color: #6a1b9a; }
+  .r-fail { background: #ffebee; color: #b71c1c; }
+  .r-pending { background: #f5f5f5; color: #757575; }
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="sys-name">Course Management System</div>
+  <nav>
+    <a href="02_student_home.html">Home</a>
+    <a href="02_student_home.html">Courses</a>
+    <a href="03_student_course_select.html">Enroll</a>
+    <a href="04_student_grades.html" class="active">Grades</a>
+    <a href="05_student_profile.html">Profile</a>
+  </nav>
+  <button class="logout-btn" onclick="location.href='01_student_login.html'">Logout</button>
+</div>
+<div class="main">
+  <div class="page-title">My Grades</div>
+  <div class="search-bar">
+    <label>Course No.:</label>
+    <input type="text" id="searchCode" placeholder="Enter course number">
+    <label>Semester:</label>
+    <select id="searchSem">
+      <option value="">All Semesters</option>
+      <option>Semester 1</option><option>Semester 2</option><option>Semester 3</option>
+    </select>
+    <button class="btn-search">Search</button>
+    <button class="btn-reset">Reset</button>
+  </div>
+  <div class="grade-stats">
+    <div class="gs-item"><span class="n">12</span>Enrolled</div>
+    <div class="gs-item"><span class="n">8</span>Graded</div>
+    <div class="gs-item"><span class="n">7</span>Passed</div>
+    <div class="gs-item"><span class="n">1</span>Failed</div>
+    <div class="gs-item"><span class="n">4</span>Pending</div>
+  </div>
+  <div class="semester-block">
+    <div class="semester-tag">Semester 1</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Course Name</th><th>Course No.</th><th>Instructor</th><th>Semester</th><th>Score</th><th>Result</th></tr></thead>
+        <tbody>
+          <tr><td>Advanced Mathematics</td><td>MATH001</td><td>Dr. Li Ming</td><td>Semester 1</td><td><span class="score-val score-high">92</span></td><td><span class="result-tag r-excellent">Excellent</span></td></tr>
+          <tr><td>College English</td><td>ENG001</td><td>Ms. Wang Fang</td><td>Semester 1</td><td><span class="score-val score-mid">75</span></td><td><span class="result-tag r-good">Good</span></td></tr>
+          <tr><td>Programming Fundamentals</td><td>CS001</td><td>Dr. Chen Zhiqiang</td><td>Semester 1</td><td><span class="score-val score-high">88</span></td><td><span class="result-tag r-good">Good</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="semester-block">
+    <div class="semester-tag">Semester 2</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Course Name</th><th>Course No.</th><th>Instructor</th><th>Semester</th><th>Score</th><th>Result</th></tr></thead>
+        <tbody>
+          <tr><td>Linear Algebra</td><td>MATH002</td><td>Dr. Zhao Jianguo</td><td>Semester 2</td><td><span class="score-val score-low">52</span></td><td><span class="result-tag r-fail">Fail</span></td></tr>
+          <tr><td>Data Structures</td><td>CS002</td><td>Dr. Chen Zhiqiang</td><td>Semester 2</td><td><span class="score-val score-mid">68</span></td><td><span class="result-tag r-pass">Pass</span></td></tr>
+          <tr><td>Operating Systems</td><td>CS007</td><td>Dr. Sun Qiang</td><td>Semester 2</td><td><span class="score-pending">Not Yet Entered</span></td><td><span class="result-tag r-pending">—</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,76 @@
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Login - Course Management System</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: "Segoe UI", Arial, sans-serif; background: #f0f2f5; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+    .login-wrap { width: 400px; }
+    .login-header { text-align: center; margin-bottom: 30px; }
+    .login-header h1 { font-size: 24px; color: #1a73e8; font-weight: 700; }
+    .login-header p { color: #666; font-size: 14px; margin-top: 6px; }
+    .login-card { background: #fff; border-radius: 8px; padding: 36px 40px; box-shadow: 0 2px 12px rgba(0,0,0,0.1); }
+    .form-title { font-size: 18px; color: #333; font-weight: 600; margin-bottom: 24px; padding-bottom: 14px; border-bottom: 1px solid #eee; }
+    .form-group { margin-bottom: 18px; }
+    .form-group label { display: block; font-size: 14px; color: #555; margin-bottom: 6px; font-weight: 500; }
+    .required { color: #e53935; margin-left: 2px; }
+    .form-group input { width: 100%; height: 40px; border: 1px solid #ddd; border-radius: 4px; padding: 0 12px; font-size: 14px; color: #333; outline: none; }
+    .form-group input:focus { border-color: #1a73e8; box-shadow: 0 0 0 2px rgba(26,115,232,0.1); }
+    .btn-group { display: flex; gap: 12px; margin-top: 24px; }
+    .btn { flex: 1; height: 40px; border: none; border-radius: 4px; font-size: 15px; cursor: pointer; font-family: inherit; font-weight: 500; }
+    .btn:hover { opacity: 0.85; }
+    .btn-primary { background: #1a73e8; color: #fff; }
+    .btn-default { background: #f5f5f5; color: #555; border: 1px solid #ddd; }
+    .msg { margin-top: 14px; padding: 10px 14px; border-radius: 4px; font-size: 13px; }
+    .msg.error { background: #fff0f0; color: #d32f2f; border: 1px solid #ffcdd2; }
+    .footer-link { text-align: center; margin-top: 16px; font-size: 13px; color: #999; }
+    .footer-link a { color: #1a73e8; text-decoration: none; }
+  </style>
+</head>
+<body>
+<form id="studentLogin" method="post" action="/scm/studentLogin">
+  <div class="login-wrap">
+    <div class="login-header">
+      <h1>Course Management System</h1>
+      <p>Student Course Selection &amp; Management</p>
+    </div>
+    <div class="login-card">
+      <div class="form-title">Student Login</div>
+      <div class="form-group">
+        <label>Student ID <span class="required">*</span></label>
+        <input type="text" id="username" name="username" placeholder="Enter your student ID" maxlength="15">
+      </div>
+      <div class="form-group">
+        <label>Password <span class="required">*</span></label>
+        <input type="password" id="password" name="password" placeholder="Enter your password" maxlength="10">
+      </div>
+      <div class="msg error" id="errMsg" style="display:none"></div>
+      <div class="btn-group">
+        <button type="submit" class="btn btn-primary" >Login</button>
+        <button class="btn btn-default" onclick="doReset()">Reset</button>
+      </div>
+    </div>
+    <div class="footer-link">Administrator? <a href="/scm/admin/login.jsp">Login here</a></div>
+  </div>
+  <script>
+    function doLogin() {
+      const u = document.getElementById('username').value.trim();
+      const p = document.getElementById('password').value;
+      if (!u || !p) { showErr('Please enter your student ID and password.'); return; }
+
+      document.getElementById("studentLogin").submit();
+      //window.location.href = '02_student_home.html';
+    }
+    function doReset() {
+      document.getElementById('username').value = '';
+      document.getElementById('password').value = '';
+      document.getElementById('errMsg').style.display = 'none';
+    }
+    function showErr(msg) { const el = document.getElementById('errMsg'); el.textContent = msg; el.style.display = 'block'; }
+  </script>
+</form>
+</body>
+</html>

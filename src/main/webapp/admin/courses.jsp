@@ -1,0 +1,260 @@
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ page import="cn.zust.demo.dao.CourseDao" %>
+<%@ page import="cn.zust.demo.entity.Course" %>
+<%@ page import="java.util.List" %>
+
+<%
+  CourseDao dao = new CourseDao();
+  List<Course> courses = dao.getAllCourses();
+%>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Course Management - Course Management System</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: "Segoe UI", Arial, sans-serif; background: #f0f2f5; min-height: 100vh; }
+  .topbar { background: #1557b0; color: #fff; height: 50px; display: flex; align-items: center; padding: 0 24px; justify-content: space-between; }
+  .topbar .sys-name { font-size: 16px; font-weight: 600; }
+  .topbar .logout-btn { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); color: #fff; padding: 5px 16px; border-radius: 4px; font-size: 13px; cursor: pointer; font-family: inherit; }
+  .layout { display: flex; min-height: calc(100vh - 50px); }
+  .sidebar { width: 200px; background: #fff; border-right: 1px solid #e8e8e8; padding: 16px 0; flex-shrink: 0; }
+  .sidebar-title { font-size: 12px; color: #aaa; padding: 8px 20px 4px; text-transform: uppercase; letter-spacing: 1px; }
+  .sidebar a { display: flex; align-items: center; gap: 10px; padding: 10px 20px; color: #555; text-decoration: none; font-size: 14px; }
+  .sidebar a:hover { background: #f0f4ff; color: #1a73e8; }
+  .sidebar a.active { background: #e8f0fe; color: #1a73e8; font-weight: 600; border-right: 3px solid #1a73e8; }
+  .sidebar .icon { font-size: 16px; width: 20px; text-align: center; }
+  .content { flex: 1; padding: 24px; }
+  .page-title { font-size: 18px; color: #333; font-weight: 600; margin-bottom: 18px; }
+  .action-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+  .btn { height: 36px; padding: 0 18px; border-radius: 4px; font-size: 14px; cursor: pointer; font-family: inherit; border: none; }
+  .btn:hover { opacity: 0.85; }
+  .btn-primary { background: #1a73e8; color: #fff; }
+  .btn-default { background: #fff; color: #555; border: 1px solid #ddd; }
+  .btn-danger { background: #e53935; color: #fff; }
+  .btn-sm { height: 30px; padding: 0 12px; font-size: 13px; }
+  .top-msg { padding: 10px 16px; border-radius: 6px; font-size: 13px; margin-bottom: 14px; }
+  .top-msg.success { background: #e8f5e9; color: #2e7d32; border: 1px solid #a5d6a7; }
+  .semester-block { margin-bottom: 24px; }
+  .semester-tag { display: inline-block; background: #e8f0fe; color: #1a73e8; font-size: 13px; font-weight: 600; padding: 4px 14px; border-radius: 12px; margin-bottom: 10px; }
+  .table-wrap { background: #fff; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); overflow: hidden; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  thead tr { background: #f8f9fa; }
+  th { padding: 10px 12px; text-align: left; color: #555; font-weight: 600; font-size: 13px; border-bottom: 1px solid #eee; }
+  td { padding: 10px 12px; color: #333; border-bottom: 1px solid #f0f0f0; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #f8fbff; }
+  .ops { display: flex; gap: 6px; }
+  .tag { display: inline-block; padding: 2px 10px; border-radius: 10px; font-size: 12px; font-weight: 500; }
+  .tag-comp { background: #fff3e0; color: #e65100; }
+  .tag-elect { background: #e8f5e9; color: #2e7d32; }
+  .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 100; align-items: center; justify-content: center; }
+  .modal-overlay.show { display: flex; }
+  .modal { background: #fff; border-radius: 8px; padding: 28px 32px; width: 520px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); max-height: 90vh; overflow-y: auto; }
+  .modal h3 { font-size: 16px; color: #333; margin-bottom: 18px; padding-bottom: 12px; border-bottom: 1px solid #eee; }
+  .form-group { margin-bottom: 14px; }
+  .form-group label { display: block; font-size: 13px; color: #555; margin-bottom: 5px; font-weight: 500; }
+  .required { color: #e53935; }
+  .form-group input, .form-group select, .form-group textarea { width: 100%; border: 1px solid #ddd; border-radius: 4px; padding: 7px 10px; font-size: 14px; outline: none; font-family: inherit; }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: #1a73e8; }
+  .form-group textarea { resize: vertical; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .modal-btns { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+  .btn-cancel { background: #f5f5f5; border: 1px solid #ddd; color: #555; padding: 7px 20px; border-radius: 4px; font-size: 14px; cursor: pointer; }
+  .btn-confirm { background: #1a73e8; border: none; color: #fff; padding: 7px 20px; border-radius: 4px; font-size: 14px; cursor: pointer; }
+  .btn-del-confirm { background: #e53935; border: none; color: #fff; padding: 7px 20px; border-radius: 4px; font-size: 14px; cursor: pointer; }
+  .del-warning { background: #fff8e1; border: 1px solid #ffe082; border-radius: 6px; padding: 10px 14px; font-size: 13px; color: #795548; margin-bottom: 10px; line-height: 1.6; }
+  .readonly-field { background: #f5f5f5; color: #888; }
+</style>
+</head>
+<body>
+<div class="topbar">
+  <%@include file="adminheader.jsp"%>
+</div>
+<div class="layout">
+  <div class="sidebar">
+    <div class="sidebar-title">Management</div>
+    <a href="home.jsp"><span class="icon">🏠</span>Dashboard</a>
+    <a href="students.jsp" ><span class="icon">👥</span>Students</a>
+    <a href="courses.jsp" class="active"><span class="icon">📚</span>Courses</a>
+    <a href="selections.jsp"><span class="icon">✏️</span>Enrollments</a>
+    <a href="grades.jsp"><span class="icon">📊</span>Grades</a>
+    <a href="users.jsp"><span class="icon">🔑</span>Users</a>
+  </div>
+  <div class="content">
+    <div class="page-title">Course Management</div>
+    <div class="action-bar"><button class="btn btn-primary" onclick="openAdd()">+ Add Course</button></div>
+    <div class="top-msg success" id="topMsg" style="display:none">Operation successful.</div>
+    <div class="semester-block">
+      <div class="semester-tag">Semester 1</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Course Name</th><th>Course No.</th><th>Instructor</th><th>Schedule</th><th>Type</th><th>Credits</th><th>Enrolled/Limit</th><th>Semester</th><th>Actions</th></tr></thead>
+          <tbody>
+
+          <% for(Course c : courses){ %>
+
+          <tr>
+
+            <td><%= c.getCourseName() %></td>
+
+            <td><%= c.getCourseNo() %></td>
+
+            <td><%= c.getInstructor() %></td>
+
+            <td><%= c.getClassTime() %></td>
+
+            <td><%= c.getCourseType() %></td>
+
+            <td><%= c.getCredits() %></td>
+
+            <td>
+              <%= new CourseDao().getEnrolledCount(c.getCourseNo()) %>
+              /
+              <%= c.getEnrollmentLimit() %>
+            </td>
+
+            <td><%= c.getSemester() %></td>
+
+            <td>
+
+              <div class="ops">
+
+                <button
+                        class="btn btn-default btn-sm"
+
+                        onclick="openEdit(
+
+                                '<%= c.getCourseName() %>',
+                                '<%= c.getCourseNo() %>',
+                                '<%= c.getInstructor() %>',
+                                '<%= c.getInstructorEmail() %>',
+                                '<%= c.getClassTime() %>',
+                                '<%= c.getSemester() %>',
+                                '<%= c.getCredits() %>',
+                                '<%= c.getRemarks() %>',
+                                '<%= c.getCourseType() %>',
+                                '<%= c.getAssessment() %>',
+                                '<%= c.getEnrollmentLimit() %>'
+
+                                )">
+
+                  Edit
+
+                </button>
+
+                <button
+                        class="btn btn-danger btn-sm"
+
+                        onclick="openDel(
+
+                                '<%= c.getCourseName() %>',
+                                '<%= c.getCourseNo() %>'
+
+                                )">
+
+                  Delete
+
+                </button>
+
+
+              </div>
+
+            </td>
+
+          </tr>
+
+          <% } %>
+
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Add/Edit Modal -->
+<div class="modal-overlay" id="formModal">
+  <div class="modal">
+    <h3 id="modalTitle">Add Course</h3>
+    <form id="courseForm" action="${pageContext.request.contextPath}/addCourse" method="post">
+    <div class="form-row">
+      <div class="form-group"><label>Course Name <span class="required">*</span></label><input type="text" id="f_cname" name="courseName"></div>
+      <div class="form-group"><label>Course No. <span class="required">*</span></label><input type="text" id="f_cno" name="courseNo"></div>
+    </div>
+      <div class="form-group">
+        <label>Credits</label>
+        <input type="number" id="f_credits" name="credits">
+      </div>
+    <div class="form-group"><label>Description</label><textarea id="f_desc" rows="2" name="remarks" placeholder="Up to 100 characters" maxlength="100"></textarea></div>
+    <div class="form-row">
+      <div class="form-group"><label>Instructor <span class="required">*</span></label><input type="text" id="f_teacher" name="instructor" placeholder="2–20 characters" maxlength="20"></div>
+      <div class="form-group"><label>Instructor Email</label><input type="text" id="f_email" name="instructorEmail" placeholder="teacher@university.edu"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Schedule <span class="required">*</span></label><input type="text" id="f_time" name="classTime" placeholder="e.g. Mon 1-2"></div>
+      <div class="form-group"><label>Semester <span class="required">*</span></label><select id="f_sem" name="semester"><option>Semester 1</option><option>Semester 2</option><option>Semester 3</option><option>Semester 4</option></select></div>
+    </div>
+      <div class="form-group"><label>Type <span class="required">*</span></label>
+        <select id="f_type" name="courseType">
+          <option>Required</option>
+          <option>Elective</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Assessment</label><input type="text" id="f_exam" name="assessment" placeholder="e.g. Written Exam">
+      </div>
+      <div class="form-group"><label>Enrollment Limit <span class="required">*</span></label><input type="number" id="f_limit" name="enrollmentLimit" placeholder="10–50" min="10" max="50">
+      </div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeModal('formModal')">Cancel</button>
+      <button type="submit" class="btn-confirm">Save</button>
+    </div>
+    </form>
+  </div>
+</div>
+<!-- Delete Modal -->
+<div class="modal-overlay" id="delModal">
+  <div class="modal">
+    <h3>Confirm Delete</h3>
+    <div class="del-warning" id="delWarning"></div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeModal('delModal')">Cancel</button>
+      <button class="btn-del-confirm" onclick="confirmDel()">Delete</button>
+    </div>
+  </div>
+</div>
+<script>
+  let editMode = false;
+  function openAdd(){document.getElementById('courseForm').action ='${pageContext.request.contextPath}/addCourse'; document.getElementById('modalTitle').textContent='Add Course';document.getElementById('f_cno').readOnly=false;document.getElementById('formModal').classList.add('show');}
+  function openEdit(name, cno, teacher, email, time, semester, credit, remarks, type, assessment, limit){
+
+    document.getElementById('courseForm').action ='${pageContext.request.contextPath}/updateCourse';
+
+    document.getElementById('modalTitle').textContent='Edit Course';
+
+    document.getElementById('f_cname').value=name;
+    document.getElementById('f_cno').value=cno;
+    document.getElementById('f_teacher').value=teacher;
+    document.getElementById('f_email').value=email;
+    document.getElementById('f_time').value=time;
+    document.getElementById('f_sem').value=semester;
+    document.getElementById('f_credits').value = credit;
+    document.getElementById('f_limit').value=limit;
+    document.getElementById('f_exam').value=assessment;
+
+    document.getElementById('f_type').value = type || "Elective";  // ⭐ IMPORTANT
+
+    document.getElementById('f_cno').readOnly=true;
+
+    document.getElementById('formModal').classList.add('show');
+  }
+  let deleteUrl = "";
+  function openDel(name, cno){deleteUrl ='${pageContext.request.contextPath}/deleteCourse?courseNo=' + cno; document.getElementById('delWarning').innerHTML = 'Delete course <strong>' + name + '</strong> (No.: ' + cno + ')?<br>This action cannot be undone!';document.getElementById('delModal').classList.add('show');}
+  function confirmDel(){window.location = deleteUrl;}
+  function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+  function submitForm() { closeModal('formModal'); showMsg(editMode ? 'Course updated successfully.' : 'Course added successfully.'); }
+  function showMsg(msg) { const el = document.getElementById('topMsg'); el.textContent = msg; el.className = 'top-msg success'; el.style.display = 'block'; setTimeout(()=>{ el.style.display='none'; }, 3000); }
+</script>
+</body>
+</html>

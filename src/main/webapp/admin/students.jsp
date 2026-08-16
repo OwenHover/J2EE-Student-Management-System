@@ -1,0 +1,286 @@
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ page import="cn.zust.demo.dao.StudentDao" %>
+<%@ page import="cn.zust.demo.entity.Student" %>
+<%@ page import="java.util.List" %>
+
+<%
+  StudentDao dao = new StudentDao();
+
+  String keyword = request.getParameter("keyword");
+
+  List<Student> students;
+
+  if(keyword != null && !keyword.trim().equals("")){
+
+    students = dao.searchBySno(keyword);
+
+  }else{
+
+    students = dao.getAllStudents();
+
+  }
+%>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Management - Course Management System</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: "Segoe UI", Arial, sans-serif; background: #f0f2f5; min-height: 100vh; }
+    .topbar { background: #1557b0; color: #fff; height: 50px; display: flex; align-items: center; padding: 0 24px; justify-content: space-between; }
+    .topbar .sys-name { font-size: 16px; font-weight: 600; }
+    .topbar .logout-btn { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); color: #fff; padding: 5px 16px; border-radius: 4px; font-size: 13px; cursor: pointer; font-family: inherit; }
+    .layout { display: flex; min-height: calc(100vh - 50px); }
+    .sidebar { width: 200px; background: #fff; border-right: 1px solid #e8e8e8; padding: 16px 0; flex-shrink: 0; }
+    .sidebar-title { font-size: 12px; color: #aaa; padding: 8px 20px 4px; text-transform: uppercase; letter-spacing: 1px; }
+    .sidebar a { display: flex; align-items: center; gap: 10px; padding: 10px 20px; color: #555; text-decoration: none; font-size: 14px; }
+    .sidebar a:hover { background: #f0f4ff; color: #1a73e8; }
+    .sidebar a.active { background: #e8f0fe; color: #1a73e8; font-weight: 600; border-right: 3px solid #1a73e8; }
+    .sidebar .icon { font-size: 16px; width: 20px; text-align: center; }
+    .content { flex: 1; padding: 24px; }
+    .page-title { font-size: 18px; color: #333; font-weight: 600; margin-bottom: 18px; }
+    .action-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+    .btn { height: 36px; padding: 0 18px; border-radius: 4px; font-size: 14px; cursor: pointer; font-family: inherit; border: none; }
+    .btn:hover { opacity: 0.85; }
+    .btn-primary { background: #1a73e8; color: #fff; }
+    .btn-default { background: #fff; color: #555; border: 1px solid #ddd; }
+    .btn-danger { background: #e53935; color: #fff; }
+    .btn-sm { height: 30px; padding: 0 12px; font-size: 13px; }
+    .search-input { height: 36px; border: 1px solid #ddd; border-radius: 4px; padding: 0 12px; font-size: 14px; width: 220px; outline: none; font-family: inherit; }
+    .search-input:focus { border-color: #1a73e8; }
+    .top-msg { padding: 10px 16px; border-radius: 6px; font-size: 13px; margin-bottom: 14px; }
+    .top-msg.success { background: #e8f5e9; color: #2e7d32; border: 1px solid #a5d6a7; }
+    .table-wrap { background: #fff; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); overflow: hidden; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    thead tr { background: #f8f9fa; }
+    th { padding: 11px 14px; text-align: left; color: #555; font-weight: 600; font-size: 13px; border-bottom: 1px solid #eee; }
+    td { padding: 11px 14px; color: #333; border-bottom: 1px solid #f0f0f0; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #f8fbff; }
+    .ops { display: flex; gap: 6px; }
+    .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 100; align-items: center; justify-content: center; }
+    .modal-overlay.show { display: flex; }
+    .modal { background: #fff; border-radius: 8px; padding: 28px 32px; width: 500px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); max-height: 90vh; overflow-y: auto; }
+    .modal h3 { font-size: 16px; color: #333; margin-bottom: 18px; padding-bottom: 12px; border-bottom: 1px solid #eee; }
+    .form-group { margin-bottom: 15px; }
+    .form-group label { display: block; font-size: 13px; color: #555; margin-bottom: 5px; font-weight: 500; }
+    .required { color: #e53935; }
+    .form-group input, .form-group select { width: 100%; height: 36px; border: 1px solid #ddd; border-radius: 4px; padding: 0 10px; font-size: 14px; outline: none; font-family: inherit; }
+    .form-group input:focus, .form-group select:focus { border-color: #1a73e8; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .modal-btns { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+    .btn-cancel { background: #f5f5f5; border: 1px solid #ddd; color: #555; padding: 7px 20px; border-radius: 4px; font-size: 14px; cursor: pointer; }
+    .btn-confirm { background: #1a73e8; border: none; color: #fff; padding: 7px 20px; border-radius: 4px; font-size: 14px; cursor: pointer; }
+    .btn-del-confirm { background: #e53935; border: none; color: #fff; padding: 7px 20px; border-radius: 4px; font-size: 14px; cursor: pointer; }
+    .del-warning { background: #fff8e1; border: 1px solid #ffe082; border-radius: 6px; padding: 10px 14px; font-size: 13px; color: #795548; margin-bottom: 10px; line-height: 1.6; }
+    .readonly-field { background: #f5f5f5; color: #888; }
+    .pagination { display: flex; justify-content: flex-end; align-items: center; gap: 6px; padding: 14px 16px; font-size: 13px; color: #666; }
+    .page-btn { height: 30px; min-width: 30px; padding: 0 8px; border: 1px solid #ddd; background: #fff; border-radius: 4px; cursor: pointer; font-size: 13px; }
+    .page-btn.active { background: #1a73e8; color: #fff; border-color: #1a73e8; }
+  </style>
+</head>
+<body>
+<div class="topbar">
+  <%@include file="adminheader.jsp"%>
+  <div class="sys-name">Course Management System | Admin Panel</div>
+  <button class="logout-btn" onclick="location.href='06_admin_login.html'">Logout</button>
+</div>
+<div class="layout">
+  <div class="sidebar">
+    <div class="sidebar-title">Management</div>
+    <a href="home.jsp"><span class="icon">🏠</span>Dashboard</a>
+    <a href="students.jsp" class="active"><span class="icon">👥</span>Students</a>
+    <a href="courses.jsp"><span class="icon">📚</span>Courses</a>
+    <a href="selections.jsp"><span class="icon">✏️</span>Enrollments</a>
+    <a href="grades.jsp"><span class="icon">📊</span>Grades</a>
+    <a href="users.jsp"><span class="icon">🔑</span>Users</a>
+  </div>
+  <div class="content">
+    <div class="page-title">Student Management</div>
+    <div class="action-bar">
+      <button class="btn btn-primary" onclick="openAdd()">+ Add Student</button>
+      <form method="get" action="students.jsp">
+        <input
+                class="search-input"
+                type="text"
+                name="keyword"
+                placeholder="Search by student ID"
+                value="<%= keyword==null ? "" : keyword %>">
+        <button class="btn btn-default" type="submit">
+
+          Search
+        </button>
+
+        <button
+                class="btn btn-default"
+                type="button"
+                onclick="window.location='students.jsp'">
+
+          Reset
+        </button>
+
+      </form>
+    </div>
+    <div class="top-msg success" id="topMsg" style="display:none">Operation successful.</div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+        <tr><th>Name</th><th>Student ID</th><th>Gender</th><th>Class</th><th>Major</th><th>College</th><th>Phone</th><th>Password</th><th>Actions</th></tr>
+        </thead>
+        <tbody>
+
+        <% for(Student s : students){ %>
+
+        <tr>
+
+          <td><%= s.getSname() %></td>
+
+          <td><%= s.getSno() %></td>
+
+          <td><%= s.getGender() %></td>
+
+          <td><%= s.getClassname() %></td>
+
+          <td><%= s.getDepart() %></td>
+
+          <td><%= s.getCollegename() %></td>
+
+          <td><%= s.getCountry() %></td>
+
+          <td><%= s.getPsw() %></td>
+
+          <td>
+            <div class="ops">
+
+              <button
+                      class="btn btn-default btn-sm"
+
+                      onclick="openEdit(
+
+                              '<%=s.getSname()%>',
+                              '<%=s.getSno()%>',
+                              '<%=s.getGender()%>',
+                              '<%=s.getClassname()%>',
+                              '<%=s.getDepart()%>',
+                              '<%=s.getCollegename()%>',
+                              '<%=s.getCountry()%>',
+                              '<%=s.getPsw()%>'
+
+                              )">
+
+                Edit
+
+              </button>
+
+              <a href="${pageContext.request.contextPath}/deleteStudent?sno=<%= s.getSno() %>">
+
+                <button class="btn btn-danger btn-sm">
+
+                  Delete
+
+                </button>
+
+              </a>
+
+            </div>
+          </td>
+
+        </tr>
+
+        <% } %>
+
+        </tbody>
+      </table>
+      <div class="pagination">486 records &nbsp;<button class="page-btn active">1</button><button class="page-btn">2</button><button class="page-btn">3</button><span>...</span><button class="page-btn">49</button></div>
+    </div>
+  </div>
+</div>
+<div class="modal-overlay" id="formModal">
+  <div class="modal">
+    <h3 id="modalTitle">Add Student</h3>
+
+    <form id="studentForm" action="${pageContext.request.contextPath}/addStudent" method="post">
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Full Name</label>
+          <input type="text" id="f_name" name="sname">
+        </div>
+
+        <div class="form-group">
+          <label>Student ID</label>
+          <input type="text" id="f_sno" name="sno">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Gender</label>
+          <select id="f_gender" name="gender">
+            <option>Male</option>
+            <option>Female</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Class</label>
+          <input type="text" id="f_class" name="classname">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Major</label>
+          <input type="text" id="f_major" name="depart">
+        </div>
+
+        <div class="form-group">
+          <label>College</label>
+          <input type="text" id="f_college" name="college">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Hometown</label>
+          <input type="text" id="f_origin" name="country">
+        </div>
+
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="f_pwd" name="psw">
+        </div>
+      </div>
+
+      <div class="modal-btns">
+        <button type="button" class="btn-cancel" onclick="closeModal('formModal')">Cancel</button>
+        <button type="submit" class="btn-confirm">Save</button>
+      </div>
+
+    </form>
+  </div>
+</div>
+<!-- Delete Confirm Modal -->
+<div class="modal-overlay" id="delModal">
+  <div class="modal">
+    <h3>Confirm Delete</h3>
+    <div class="del-warning" id="delWarning"></div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeModal('delModal')">Cancel</button>
+      <button class="btn-del-confirm" onclick="confirmDel()">Delete</button>
+    </div>
+  </div>
+</div>
+<script>
+  let editMode = false;
+  function openAdd() { editMode = false;document.getElementById('studentForm').action= '${pageContext.request.contextPath}/addStudent';document.getElementById('modalTitle').textContent = 'Add Student'; document.getElementById('f_sno').readOnly = false; document.getElementById('f_sno').className = ''; document.getElementById('f_pwd').value = '123456'; document.getElementById('formModal').classList.add('show'); }
+  function openEdit(name, sno, gender, classname, depart, college, country, psw){editMode = true;document.getElementById('studentForm').action= '${pageContext.request.contextPath}/updateStudent';document.getElementById('modalTitle').textContent='Edit Student';document.getElementById('f_name').value=name;document.getElementById('f_sno').value=sno;document.getElementById('f_gender').value=gender;document.getElementById('f_class').value=classname;document.getElementById('f_major').value=depart;document.getElementById('f_college').value=college;document.getElementById('f_origin').value=country;document.getElementById('f_pwd').value=psw;document.getElementById('f_sno').readOnly=true;document.getElementById('formModal').classList.add('show');}
+  function openDel(name, sno) { document.getElementById('delWarning').innerHTML = 'Delete student <strong>' + name + '</strong> (ID: ' + sno + ')?<br>All enrollment and grade records will be permanently deleted and cannot be recovered!'; document.getElementById('delModal').classList.add('show'); }
+  function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+  function confirmDel() { closeModal('delModal'); showMsg('Student deleted successfully.'); }
+  function showMsg(msg) { const el = document.getElementById('topMsg'); el.textContent = msg; el.className = 'top-msg success'; el.style.display = 'block'; setTimeout(()=>{ el.style.display='none'; }, 3000); }
+</script>
+</body>
+</html>

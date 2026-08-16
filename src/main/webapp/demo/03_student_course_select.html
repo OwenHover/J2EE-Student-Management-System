@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Course Enrollment - Course Management System</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: "Segoe UI", Arial, sans-serif; background: #f0f2f5; min-height: 100vh; }
+  .topbar { background: #1a73e8; color: #fff; height: 50px; display: flex; align-items: center; padding: 0 24px; justify-content: space-between; }
+  .topbar .sys-name { font-size: 16px; font-weight: 600; }
+  .topbar nav { display: flex; gap: 4px; }
+  .topbar nav a { color: rgba(255,255,255,0.85); text-decoration: none; font-size: 14px; padding: 6px 14px; border-radius: 4px; }
+  .topbar nav a:hover, .topbar nav a.active { background: rgba(255,255,255,0.15); color: #fff; }
+  .topbar .logout-btn { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); color: #fff; padding: 5px 16px; border-radius: 4px; font-size: 13px; cursor: pointer; font-family: inherit; }
+  .main { max-width: 1100px; margin: 0 auto; padding: 24px 16px; }
+  .page-title { font-size: 18px; color: #333; font-weight: 600; margin-bottom: 16px; }
+  .notice { background: #fff8e1; border: 1px solid #ffe082; border-radius: 6px; padding: 10px 16px; font-size: 13px; color: #795548; margin-bottom: 18px; }
+  .notice strong { color: #e65100; }
+  .top-msg { text-align: center; padding: 10px 18px; border-radius: 6px; font-size: 14px; margin-bottom: 16px; }
+  .top-msg.success { background: #e8f5e9; color: #2e7d32; border: 1px solid #a5d6a7; }
+  .top-msg.error { background: #fff0f0; color: #d32f2f; border: 1px solid #ffcdd2; }
+  .semester-block { margin-bottom: 28px; }
+  .semester-tag { display: inline-block; background: #e8f0fe; color: #1a73e8; font-size: 13px; font-weight: 600; padding: 4px 14px; border-radius: 12px; margin-bottom: 12px; }
+  .table-wrap { background: #fff; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); overflow: hidden; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  thead tr { background: #f8f9fa; }
+  th { padding: 11px 14px; text-align: left; color: #555; font-weight: 600; font-size: 13px; border-bottom: 1px solid #eee; }
+  td { padding: 11px 14px; color: #333; border-bottom: 1px solid #f0f0f0; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #f8fbff; }
+  .tag { display: inline-block; padding: 2px 10px; border-radius: 10px; font-size: 12px; font-weight: 500; }
+  .tag-comp { background: #fff3e0; color: #e65100; }
+  .tag-elect { background: #e8f5e9; color: #2e7d32; }
+  .capacity .cur { color: #e53935; font-weight: 600; }
+  .btn-select { background: #1a73e8; color: #fff; border: none; padding: 5px 14px; border-radius: 4px; font-size: 13px; cursor: pointer; }
+  .btn-select:hover { opacity: 0.85; }
+  .btn-select:disabled { background: #bdbdbd; cursor: not-allowed; }
+  .btn-selected { background: #e8f5e9; color: #388e3c; border: 1px solid #a5d6a7; padding: 5px 14px; border-radius: 4px; font-size: 13px; }
+  .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 100; align-items: center; justify-content: center; }
+  .modal-overlay.show { display: flex; }
+  .modal { background: #fff; border-radius: 8px; padding: 28px 32px; width: 420px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); }
+  .modal h3 { font-size: 16px; color: #333; margin-bottom: 14px; }
+  .modal p { font-size: 14px; color: #555; line-height: 1.6; margin-bottom: 20px; }
+  .modal-btns { display: flex; justify-content: flex-end; gap: 10px; }
+  .btn-cancel { background: #f5f5f5; border: 1px solid #ddd; color: #555; padding: 7px 20px; border-radius: 4px; font-size: 14px; cursor: pointer; }
+  .btn-confirm { background: #1a73e8; border: none; color: #fff; padding: 7px 20px; border-radius: 4px; font-size: 14px; cursor: pointer; }
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="sys-name">Course Management System</div>
+  <nav>
+    <a href="02_student_home.html">Home</a>
+    <a href="02_student_home.html">Courses</a>
+    <a href="03_student_course_select.html" class="active">Enroll</a>
+    <a href="04_student_grades.html">Grades</a>
+    <a href="05_student_profile.html">Profile</a>
+  </nav>
+  <button class="logout-btn" onclick="location.href='01_student_login.html'">Logout</button>
+</div>
+<div class="main">
+  <div class="page-title">Course Enrollment</div>
+  <div class="notice">
+    <strong>Enrollment Open: Semester 3</strong> &nbsp;|&nbsp; Elective courses only &nbsp;|&nbsp; Enrollment period: Mar 1 – Mar 15, 2026
+  </div>
+  <div class="top-msg success" id="topMsg" style="display:none"></div>
+  <div class="semester-block">
+    <div class="semester-tag">Semester 3 (Currently Open)</div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Course Name</th><th>Course No.</th><th>Description</th><th>Instructor</th><th>Schedule</th><th>Type</th><th>Credits</th><th>Enrolled/Limit</th><th>Action</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Database Principles</td><td>CS003</td><td>Relational database theory and practice</td><td>Dr. Wang Lei</td><td>Mon 3-4</td>
+            <td><span class="tag tag-elect">Elective</span></td><td>3</td><td><span class="capacity"><span class="cur">18</span>/30</span></td>
+            <td><button class="btn-select" onclick="showConfirm('Database Principles','CS003')">Enroll</button></td>
+          </tr>
+          <tr>
+            <td>Intro to AI</td><td>CS004</td><td>AI fundamentals and applications</td><td>Dr. Liu Yang</td><td>Wed 1-2</td>
+            <td><span class="tag tag-elect">Elective</span></td><td>2</td><td><span class="capacity"><span class="cur">30</span>/30</span></td>
+            <td><button class="btn-select" disabled>Full</button></td>
+          </tr>
+          <tr>
+            <td>Software Engineering</td><td>CS005</td><td>SDLC, methodologies and project management</td><td>Dr. Zhang Hua</td><td>Fri 3-4</td>
+            <td><span class="tag tag-elect">Elective</span></td><td>3</td><td><span class="capacity">12/40</span></td>
+            <td><span class="btn-selected">&#10003; Enrolled</span></td>
+          </tr>
+          <tr>
+            <td>Computer Networks</td><td>CS006</td><td>Network protocols and architectures</td><td>Dr. Zhao Min</td><td>Tue 7-8</td>
+            <td><span class="tag tag-comp">Required</span></td><td>4</td><td><span class="capacity">25/40</span></td>
+            <td><button class="btn-select" disabled title="Required courses are assigned automatically">—</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal">
+    <h3>Confirm Enrollment</h3>
+    <p id="confirmText"></p>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-confirm" onclick="doSelect()">Confirm</button>
+    </div>
+  </div>
+</div>
+<script>
+  let pendingName = '', pendingCode = '';
+  function showConfirm(name, code) {
+    pendingName = name; pendingCode = code;
+    document.getElementById('confirmText').innerHTML = 'Enroll in <strong>' + name + '</strong> (Course No.: ' + code + ')?';
+    document.getElementById('confirmModal').classList.add('show');
+  }
+  function closeModal() { document.getElementById('confirmModal').classList.remove('show'); }
+  function doSelect() {
+    closeModal();
+    const msg = document.getElementById('topMsg');
+    msg.className = 'top-msg success';
+    msg.textContent = 'Enrollment successful! Course: ' + pendingName + ' (' + pendingCode + ')';
+    msg.style.display = 'block';
+    window.scrollTo(0,0);
+  }
+</script>
+</body>
+</html>

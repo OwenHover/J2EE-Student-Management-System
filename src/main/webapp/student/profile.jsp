@@ -1,0 +1,107 @@
+<%@ page import="cn.zust.demo.entity.Student" %>
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Profile - Course Management System</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: "Segoe UI", Arial, sans-serif; background: #f0f2f5; min-height: 100vh; }
+    .topbar { background: #1a73e8; color: #fff; height: 50px; display: flex; align-items: center; padding: 0 24px; justify-content: space-between; }
+    .topbar .sys-name { font-size: 16px; font-weight: 600; }
+    .topbar nav { display: flex; gap: 4px; }
+    .topbar nav a { color: rgba(255,255,255,0.85); text-decoration: none; font-size: 14px; padding: 6px 14px; border-radius: 4px; }
+    .topbar nav a:hover, .topbar nav a.active { background: rgba(255,255,255,0.15); color: #fff; }
+    .topbar .logout-btn { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); color: #fff; padding: 5px 16px; border-radius: 4px; font-size: 13px; cursor: pointer; font-family: inherit; }
+    .main { max-width: 800px; margin: 0 auto; padding: 24px 16px; }
+    .page-title { font-size: 18px; color: #333; font-weight: 600; margin-bottom: 20px; }
+    .card { background: #fff; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); margin-bottom: 20px; overflow: hidden; }
+    .card-header { background: #f8f9fa; padding: 14px 20px; border-bottom: 1px solid #eee; font-size: 15px; font-weight: 600; color: #333; }
+    .card-body { padding: 20px 24px; }
+    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+    .info-item { padding: 10px 0; border-bottom: 1px solid #f0f0f0; display: flex; }
+    .info-item:nth-last-child(1), .info-item:nth-last-child(2) { border-bottom: none; }
+    .info-label { width: 120px; color: #888; font-size: 13px; flex-shrink: 0; }
+    .info-val { color: #333; font-size: 14px; }
+    .info-readonly { color: #aaa; font-size: 12px; margin-left: 6px; }
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 14px; color: #555; margin-bottom: 6px; font-weight: 500; }
+    .required { color: #e53935; margin-left: 2px; }
+    .form-group input { width: 100%; max-width: 320px; height: 38px; border: 1px solid #ddd; border-radius: 4px; padding: 0 12px; font-size: 14px; color: #333; outline: none; font-family: inherit; }
+    .form-group input:focus { border-color: #1a73e8; }
+    .hint { font-size: 12px; color: #999; margin-top: 4px; }
+    .btn-submit { background: #1a73e8; color: #fff; border: none; height: 38px; padding: 0 28px; border-radius: 4px; font-size: 14px; cursor: pointer; margin-top: 4px; }
+    .btn-submit:hover { opacity: 0.85; }
+    .msg { padding: 10px 14px; border-radius: 4px; font-size: 13px; margin-bottom: 14px; }
+    .msg.success { background: #e8f5e9; color: #2e7d32; border: 1px solid #a5d6a7; }
+    .msg.error { background: #fff0f0; color: #d32f2f; border: 1px solid #ffcdd2; }
+  </style>
+</head>
+<body>
+<div class="topbar">
+  <%@include file="studentheader.jsp"%>
+</div>
+<div class="main">
+  <div class="page-title">My Profile</div>
+  <div class="card">
+    <div class="card-header">Basic Information</div>
+    <div class="card-body">
+      <div class="info-grid">
+        <%
+          Student student = (Student)session.getAttribute("loginStudent");
+
+        %>
+        <div class="info-item"><div class="info-label">Full Name</div><div class="info-val"><%=student.getSname()%> <span class="info-readonly">(read-only)</span></div></div>
+        <div class="info-item"><div class="info-label">Student ID</div><div class="info-val"><%=student.getSno()%>  <span class="info-readonly">(read-only)</span></div></div>
+        <div class="info-item"><div class="info-label">Gender</div><div class="info-val"><%=student.getGender()%> </div></div>
+        <div class="info-item"><div class="info-label">Class</div><div class="info-val"><%=student.getClassname()%></div></div>
+        <div class="info-item"><div class="info-label">Major</div><div class="info-val"><%=student.getDepart()%></div></div>
+        <div class="info-item"><div class="info-label">College</div><div class="info-val"><%=student.getCollegename()%></div></div>
+        <div class="info-item"><div class="info-label">Hometown</div><div class="info-val"><%=student.getCountry()%></div></div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <form method="post" id="changepswForm" action="/scm/studentProfile">
+      <input type="hidden" id="sno" name="sno" value="<%=student.getSno()%>" />
+      <div class="card-header">Change Password</div>
+      <div class="card-body">
+        <div class="msg success" id="successMsg" style="display:none">Password changed successfully. Please log in again.</div>
+        <div class="msg error" id="errMsg" style="display:none"></div>
+        <div class="form-group">
+          <label>Current Password <span class="required">*</span></label>
+          <input type="password" id="oldPwd" name="oldPwd" placeholder="Enter current password" maxlength="10">
+        </div>
+        <div class="form-group">
+          <label>New Password <span class="required">*</span></label>
+          <input type="password" id="newPwd" name="newPwd" placeholder="Enter new password" maxlength="10">
+          <div class="hint">Password must be 6–10 characters long.</div>
+        </div>
+        <div class="form-group">
+          <label>Confirm New Password <span class="required">*</span></label>
+          <input type="password" id="confirmPwd" name="confirmPwd" placeholder="Re-enter new password" maxlength="10">
+        </div>
+        <button class="btn-submit" onclick="changePwd()">Save Changes</button>
+      </div>
+    </form>
+  </div>
+</div>
+<script>
+  function changePwd() {
+    const old = document.getElementById('oldPwd').value;
+    const nw = document.getElementById('newPwd').value;
+    const cf = document.getElementById('confirmPwd').value;
+    const errEl = document.getElementById('errMsg');
+    errEl.style.display = 'none';
+    if (!old || !nw || !cf) { showErr('Please fill in all required fields.'); return; }
+    if (nw.length < 6 || nw.length > 10) { showErr('New password must be 6–10 characters long.'); return; }
+    if (nw !== cf) { showErr('Passwords do not match.'); return; }
+    document.getElementById('successMsg').style.display = 'block';
+    document.getElementById('changepswForm').submit();
+  }
+  function showErr(msg) { const el = document.getElementById('errMsg'); el.textContent = msg; el.style.display = 'block'; }
+</script>
+</body>
+</html>
